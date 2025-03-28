@@ -22,6 +22,7 @@ from src.providers.execution.contracts.cs_module import CSModuleContract
 from src.providers.ipfs import CID, CIDv0, CIDv1, is_cid_v0
 from src.types import BlockStamp, SlotNumber
 from src.utils.events import get_events_in_range
+from src.utils.lazy_object_proxy import LazyObjectProxy
 from src.web3py.extensions.lido_validators import NodeOperatorId
 
 logger = logging.getLogger(__name__)
@@ -123,5 +124,5 @@ class CSM(Module):
 class LazyCSM(CSM):
     """A wrapper around CSM module to achieve lazy-loading behaviour"""
 
-    def __new__(cls, w3: Web3):
-        return Proxy(partial(CSM, w3))  # type: ignore
+    def __new__(cls, w3: Web3) -> LazyObjectProxy[CSM]:
+        return LazyObjectProxy(partial(CSM, w3))  # type: ignore
