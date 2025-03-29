@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   build1:
@@ -33,9 +34,10 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          tags: app:ci
-          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/oracle:build1
+          push: true
           outputs: type=docker,dest=image.tar,rewrite-timestamp=true
+    
         env:
           SOURCE_DATE_EPOCH: 0
 
@@ -64,8 +66,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          tags: app:ci
-          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/oracle:build2
+          push: true
           outputs: type=docker,dest=image.tar,rewrite-timestamp=true
         env:
           SOURCE_DATE_EPOCH: 0
