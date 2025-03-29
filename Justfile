@@ -1,5 +1,5 @@
 build name:
-    docker build --timestamp=0 --no-cache --format docker -t {{name}} --env=SOURCE_DATE_EPOCH=0 --no-hostname .
+    SOURCE_DATE_EPOCH=0 docker buildx build --no-cache -t {{name}} --build-arg=SOURCE_DATE_EPOCH=0 .
 
 diffbuild:
     just build oracle

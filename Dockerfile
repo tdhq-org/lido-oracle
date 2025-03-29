@@ -1,5 +1,6 @@
 FROM python:3.12.4-slim as base
 
+ARG SOURCE_DATE_EPOCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends -qq \
     libffi-dev=3.4.4-1 \
