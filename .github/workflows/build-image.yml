@@ -59,7 +59,11 @@ jobs:
           echo "Hash from the second image build: ${{ steps.hash.outputs.sha256 }}"
 
       - name: Load image from tar
-        run: docker load -i image.tar
+        # awk for
+        # Loaded image ID: sha256:a7d9a6d8d9a5fc7022eb44b3a81824c784571cffd3fb5b827524e885771d317b
+        run: |
+          IMAGE=$(docker load -i image.tar | awk '{print $4}')
+          docker tag "$IMAGE" ghcr.io/${{ github.repository_owner }}/oracle:build1
 
       - name: Push image from saved copy
         run: docker push ghcr.io/${{ github.repository_owner }}/oracle:build1
@@ -105,7 +109,9 @@ jobs:
           echo "Hash from the second image build: ${{ steps.hash.outputs.sha256 }}"
 
       - name: Load image from tar
-        run: docker load -i image.tar
+        run: |
+          IMAGE=$(docker load -i image.tar | awk '{print $4}')
+          docker tag "$IMAGE" ghcr.io/${{ github.repository_owner }}/oracle:build2
 
       - name: Push image from saved copy
         run: docker push ghcr.io/${{ github.repository_owner }}/oracle:build2
