@@ -44,6 +44,7 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/oracle:build1
           push: true
           outputs: type=docker,dest=image.tar,rewrite-timestamp=true
+          provenance: false
     
         env:
           SOURCE_DATE_EPOCH: 0
@@ -83,6 +84,7 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/oracle:build2
           push: true
           outputs: type=docker,dest=image.tar,rewrite-timestamp=true
+          provenance: false
         env:
           SOURCE_DATE_EPOCH: 0
 
