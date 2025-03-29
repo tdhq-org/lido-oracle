@@ -41,8 +41,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          tags: ghcr.io/${{ github.repository_owner }}/oracle:foobar
-          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/oracle:build1
+          push: false
           load: true
           outputs: type=docker,dest=image.tar,rewrite-timestamp=true
           provenance: false
@@ -57,6 +57,12 @@ jobs:
       - name: Report image hash
         run: |
           echo "Hash from the second image build: ${{ steps.hash.outputs.sha256 }}"
+
+      - name: Load image from tar
+        run: docker load -i image.tar
+
+      - name: Push image from saved copy
+        run: docker push ghcr.io/${{ github.repository_owner }}/oracle:build1
 
   build2:
     runs-on: ubuntu-latest
@@ -82,8 +88,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          tags: ghcr.io/${{ github.repository_owner }}/oracle:foobar
-          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/oracle:build2
+          push: false
           load: true
           outputs: type=docker,dest=image.tar,rewrite-timestamp=true
           provenance: false
@@ -97,6 +103,13 @@ jobs:
       - name: Report image hash
         run: |
           echo "Hash from the second image build: ${{ steps.hash.outputs.sha256 }}"
+
+      - name: Load image from tar
+        run: docker load -i image.tar
+
+      - name: Push image from saved copy
+        run: docker push ghcr.io/${{ github.repository_owner }}/oracle:build2
+
 
   reproducability:
     runs-on: ubuntu-latest
