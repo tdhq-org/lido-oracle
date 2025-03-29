@@ -2,6 +2,7 @@
 name: Build Docker image
 
 on:
+  push:
   workflow_dispatch:
   pull_request:
     branches:
@@ -18,7 +19,7 @@ jobs:
   build1:
     runs-on: ubuntu-latest
     outputs:
-      digest: ${{ steps.build.outputs.digest }}
+      sha256: ${{ steps.hash.outputs.sha256 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -34,18 +35,22 @@ jobs:
         with:
           tags: app:ci
           push: false
-          load: true
+          outputs: type=tar,dest=image.tar,rewrite-timestamp=true
         env:
           SOURCE_DATE_EPOCH: 0
 
-      - name: Report image digest
+      - name: Compute SHA256
+        id: hash
+        run: echo "sha256=$(sha256sum image.tar | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Report image hash
         run: |
-          echo "Digest from the first image build: ${{ steps.build.outputs.digest }}"
+          echo "Hash from the second image build: ${{ steps.hash.outputs.sha256 }}"
 
   build2:
     runs-on: ubuntu-latest
     outputs:
-      digest: ${{ steps.build.outputs.digest }}
+      sha256: ${{ steps.hash.outputs.sha256 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -61,13 +66,17 @@ jobs:
         with:
           tags: app:ci
           push: false
-          load: true
+          outputs: type=tar,dest=image.tar,rewrite-timestamp=true
         env:
           SOURCE_DATE_EPOCH: 0
 
-      - name: Report image digest
+      - name: Compute SHA256
+        id: hash
+        run: echo "sha256=$(sha256sum image.tar | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Report image hash
         run: |
-          echo "Digest from the second image build: ${{ steps.build.outputs.digest }}"
+          echo "Hash from the second image build: ${{ steps.hash.outputs.sha256 }}"
 
   reproducability:
     runs-on: ubuntu-latest
@@ -75,14 +84,18 @@ jobs:
       - build1
       - build2
     steps:
-
-      - name: Report image digests
+      - name: Fail if empty
+        if: ${{ needs.build1.outputs.sha256 == '' }}
         run: |
-          echo "Digest from the first image build: ${{ needs.build1.outputs.digest }}"
-          echo "Digest from the second image build: ${{ needs.build2.outputs.digest }}"
+          echo needs.build1.outputs.sha256 is ${{ needs.build1.outputs.sha256 }}
+          exit 1
+      - name: Report image Hash
+        run: |
+          echo "Hash from the first image build: ${{ needs.build1.outputs.sha256 }}"
+          echo "Hash from the second image build: ${{ needs.build2.outputs.sha256 }}"
 
       - name: Check if match
-        if: needs.build1.outputs.digest != needs.build2.outputs.digest
+        if: ${{ needs.build1.outputs.sha256 != needs.build2.outputs.sha256 }}
         run: | 
-          echo ${{ needs.build1.outputs.digest }} != ${{ needs.build1.outputs.digest }}
+          echo ${{ needs.build1.outputs.sha256 }} != ${{ needs.build2.outputs.sha256 }}
           exit 1
